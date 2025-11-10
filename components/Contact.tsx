@@ -34,16 +34,20 @@ export const Contact: React.FC = () => {
     setStatus('loading');
     setResponseMessage('');
 
-    const formData = new FormData();
-    formData.append('form-name', 'contact'); // nome do formulário que o Netlify usará
+    // Construir body URL-encoded conforme recomendado pelo Netlify para AJAX
+    const encoded = new URLSearchParams();
+    encoded.append('form-name', 'contact');
+    // honeypot (bot-field) - enviar vazio quando usuário legítimo
+    encoded.append('bot-field', '');
     Object.entries(formState).forEach(([key, value]) =>
-      formData.append(key, value)
+      encoded.append(key, String(value))
     );
 
     try {
       const response = await fetch('/', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: encoded.toString(),
       });
 
       if (response.ok) {
