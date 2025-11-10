@@ -1,4 +1,4 @@
-import React, { useState, FormEvent } from 'react';
+import React, { useState, FormEvent, useRef } from 'react';
 import { SocialIcon } from './SocialIcon';
 
 type FormState = {
@@ -18,6 +18,35 @@ export const Contact: React.FC = () => {
   const [status, setStatus] = useState<SubmissionStatus>('idle');
   const [responseMessage, setResponseMessage] = useState('');
 
+  const nameRef = useRef<HTMLInputElement | null>(null);
+  const emailRef = useRef<HTMLInputElement | null>(null);
+  const messageRef = useRef<HTMLTextAreaElement | null>(null);
+
+  const validateForm = () => {
+    const name = formState.name.trim();
+    const email = formState.email.trim();
+    const message = formState.message.trim();
+
+    if (!name) {
+      return { valid: false, field: 'name', message: 'Por favor, preencha seu nome.' };
+    }
+
+    if (!email) {
+      return { valid: false, field: 'email', message: 'Por favor, preencha seu email.' };
+    }
+
+    const emailRe = /^\S+@\S+\.\S+$/;
+    if (!emailRe.test(email)) {
+      return { valid: false, field: 'email', message: 'Por favor, informe um email válido.' };
+    }
+
+    if (!message) {
+      return { valid: false, field: 'message', message: 'Por favor, escreva sua mensagem.' };
+    }
+
+    return { valid: true };
+  };
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -28,9 +57,22 @@ export const Contact: React.FC = () => {
     }));
   };
 
-  // 🔹 ALTERADO: agora envia de verdade para o endpoint do Netlify
+  // Envia para o endpoint do Netlify, mas só se a validação passar
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    // validação antes de enviar
+    const validation = validateForm();
+    if (!validation.valid) {
+      setStatus('idle');
+      setResponseMessage(validation.message || 'Preencha todos os campos.');
+      // foca o primeiro campo inválido
+      if (validation.field === 'name') nameRef.current?.focus();
+      if (validation.field === 'email') emailRef.current?.focus();
+      if (validation.field === 'message') messageRef.current?.focus();
+      return;
+    }
+
     setStatus('loading');
     setResponseMessage('');
 
