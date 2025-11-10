@@ -43,6 +43,14 @@
 <link rel="stylesheet" href="/index.css">
 </head>
   <body class="bg-neutral-50 font-sans text-slate-800">
+
+    <!--  Formulário oculto exigido pelo Netlify Forms -->
+    <form name="contact" netlify hidden>
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <textarea name="message"></textarea>
+    </form>
+
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>
